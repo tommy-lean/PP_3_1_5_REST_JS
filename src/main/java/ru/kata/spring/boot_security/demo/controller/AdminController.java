@@ -19,7 +19,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/users")
-public class UsersController {
+public class AdminController {
     private final UserService userService;
 
     private final RoleService roleService;
@@ -27,44 +27,53 @@ public class UsersController {
     private final UserValidator userValidator;
 
     @Autowired
-    public UsersController(UserService userService, RoleService roleService, UserValidator userValidator) {
+    public AdminController(UserService userService, RoleService roleService, UserValidator userValidator) {
         this.userService = userService;
         this.roleService = roleService;
         this.userValidator = userValidator;
     }
 
-    @GetMapping("/user")
-    public String showUserInfo(Model model, Principal principal){
-        User user = userService.findByUsername(principal.getName());
-        model.addAttribute("user", user);
-        return "user";
-    }
+//    @GetMapping("/user")
+//    public String showUserInfo(Model model, Principal principal){
+//        User user = userService.findByUsername(principal.getName());
+//        model.addAttribute("user", user);
+//        return "user";
+//    }
 
     @GetMapping("/admin")
-    public String showAllUsers(Model model){
+    public String showAllUsers(Model model, Principal principal){
         List<User> users = userService.listUsers();
+        User user = userService.findByUsername(principal.getName());
+        model.addAttribute("allRoles", roleService.getAllRoles());
+        model.addAttribute("newUser", new User());
+        model.addAttribute("authUser", user);
         model.addAttribute("users", users);
-        return "allUsers";
+        return "adminPage";
     }
-
-    @GetMapping("/admin/new")
-    public String showFormAddUser(Model model){
-        List<Role> roles = roleService.getAllRoles();
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roles);
-        return "newUser";
-    }
-
-
-    @PostMapping
-    public String addUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult){
+    @PostMapping("/admin")
+    public String addUser(@ModelAttribute("newUser") @Valid User user, BindingResult bindingResult,
+                          Principal principal, Model model){
         userValidator.validate(user, bindingResult);
+//        User authUser = userService.findByUsername(principal.getName());
+//        model.addAttribute("authUser", authUser);
         if(bindingResult.hasErrors()){
-            return "newUser";
+            return "adminPage"; // TODO!!!!!!!!!!!!!!!!!!
         }
         userService.add(user);
         return "redirect:/users/admin";
     }
+
+//    @GetMapping("/admin/new")
+//    public String showFormAddUser(Model model, Principal principal){
+//        List<Role> roles = roleService.getAllRoles();
+//        model.addAttribute("user", new User());
+//        User user = userService.findByUsername(principal.getName());
+//        model.addAttribute("thisUser", user);
+//        model.addAttribute("allRoles", roles);
+//        return "newUser2";
+//    }
+
+
 
     @GetMapping("/admin/update")
     public String updateUserForm(Model model, @RequestParam("id") Long id){

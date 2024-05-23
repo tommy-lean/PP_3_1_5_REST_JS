@@ -49,6 +49,11 @@ public class Role implements GrantedAuthority {
     public String getAuthority() {
         return getName();
     }
+// ROLE_
+    @Override
+    public String toString() {
+        return name.substring(5);
+    }
 
     public int hashCode() {
         final int prime = 31;
