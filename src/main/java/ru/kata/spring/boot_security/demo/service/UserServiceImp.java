@@ -6,21 +6,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.UsersRepository;
 
+import java.security.Principal;
 import java.util.List;
 
 @Service
 public class UserServiceImp implements UserService{
 
     private final UsersRepository usersRepository;
+    private final RoleService roleService;
 
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImp(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImp(UsersRepository usersRepository, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.usersRepository = usersRepository;
+        this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -52,11 +56,26 @@ public class UserServiceImp implements UserService{
     public void delete(User user) {
         usersRepository.delete(user);
     }
+    @Transactional
+    @Override
+    public void deleteById(Long id) {
+        if (usersRepository.findById(id).isPresent()){
+            usersRepository.deleteById(id);
+        }
+    }
 
     @Transactional
     @Override
     public void update(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersRepository.save(user);
+    }
+
+
+    public void createModelForView(Model model, Principal principal){
+        model.addAttribute("authUser", findByUsername(principal.getName()));
+        model.addAttribute("users", listUsers());
+        model.addAttribute("allRoles", roleService.getAllRoles());
+        model.addAttribute("activeTab", "addUser");
     }
 }

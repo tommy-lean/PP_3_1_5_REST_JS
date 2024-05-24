@@ -42,16 +42,18 @@
         <div class="col-8 mt-3">
             <h1>Admin panel</h1>
             <div class="">
-                <ul class="nav nav-tabs" role=tablist>
+                <ul class="nav nav-tabs"  role=tablist>
                     <li class="nav-item">
-                        <a class="nav-link active"  href="#usersTable" role="tab" data-bs-toggle="tab">Users table</a>
+                        <a class="nav-link" th:classappend="${activeTab == 'usersTable'} ? 'active' : ''"
+                           href="#usersTable" role="tab" data-bs-toggle="tab">Users table</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#addUser" role="tab" data-bs-toggle="tab">New user</a>
+                        <a class="nav-link" th:classappend="${activeTab == 'addUser'} ? 'active' : ''"
+                           href="#addUser" role="tab" data-bs-toggle="tab">New user</a>
                     </li>
                 </ul>
                 <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane fade show active" id="usersTable">
+                    <div role="tabpanel" th:class="'tab-pane fade' + (${activeTab == 'usersTable'} ? ' show active' : '')" id="usersTable">
                         <h4 class="mt-3">All users</h4>
                         <table class="table table-striped">
                             <thead>
@@ -92,7 +94,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div role="tabpanel" class="tab-pane fade" id="addUser" aria-labelledby="add-user-tab">
+                    <div role="tabpanel" th:class="'tab-pane fade' + (${activeTab == 'addUser'} ? ' show active' : '')" id="addUser" aria-labelledby="add-user-tab">
                         <h4 class="mt-3">Add new user</h4>
                         <hr/>
                         <div class="card-body text-center">

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
+import ru.kata.spring.boot_security.demo.service.SupportingService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 import ru.kata.spring.boot_security.demo.validators.UserValidator;
 
@@ -21,15 +22,15 @@ import java.util.List;
 @RequestMapping("/users")
 public class AdminController {
     private final UserService userService;
-
     private final RoleService roleService;
-
+    private final SupportingService supportingService;
     private final UserValidator userValidator;
 
     @Autowired
-    public AdminController(UserService userService, RoleService roleService, UserValidator userValidator) {
+    public AdminController(UserService userService, RoleService roleService, SupportingService supportingService, UserValidator userValidator) {
         this.userService = userService;
         this.roleService = roleService;
+        this.supportingService = supportingService;
         this.userValidator = userValidator;
     }
 
@@ -41,23 +42,31 @@ public class AdminController {
 //    }
 
     @GetMapping("/admin")
-    public String showAllUsers(Model model, Principal principal){
-        List<User> users = userService.listUsers();
-        User user = userService.findByUsername(principal.getName());
-        model.addAttribute("allRoles", roleService.getAllRoles());
+    public String showAllUsers(Model model, Principal principal,
+                               @RequestParam(value = "id",required = false) Long id){
+        User authUser = userService.findByUsername(principal.getName());
         model.addAttribute("newUser", new User());
-        model.addAttribute("authUser", user);
-        model.addAttribute("users", users);
-        return "adminPage";
+//        supportingService.createModelForView(model, principal);
+        model.addAttribute("authUser", authUser);
+        model.addAttribute("users", userService.listUsers());
+        model.addAttribute("allRoles", roleService.getAllRoles());
+        model.addAttribute("activeTab", "usersTable");
+        /*updateUser*/
+        model.addAttribute("user", userService.findById(id));
+        return "adminPageTest";
     }
     @PostMapping("/admin")
     public String addUser(@ModelAttribute("newUser") @Valid User user, BindingResult bindingResult,
                           Principal principal, Model model){
         userValidator.validate(user, bindingResult);
-//        User authUser = userService.findByUsername(principal.getName());
-//        model.addAttribute("authUser", authUser);
+//        supportingService.createModelForView(model, principal);
+        model.addAttribute("authUser", userService.findByUsername(principal.getName()));
+        model.addAttribute("users", userService.listUsers());
+        model.addAttribute("allRoles", roleService.getAllRoles());
+        model.addAttribute("activeTab", "addUser");
+//        model.addAttribute("user", userService.findById(id)); /*updateUser*/
         if(bindingResult.hasErrors()){
-            return "adminPage"; // TODO!!!!!!!!!!!!!!!!!!
+            return "adminPageTest"; // TODO!!!!!!!!!!!!!!!!!!
         }
         userService.add(user);
         return "redirect:/users/admin";
@@ -76,30 +85,37 @@ public class AdminController {
 
 
     @GetMapping("/admin/update")
-    public String updateUserForm(Model model, @RequestParam("id") Long id){
+    public String updateUserForm(Model model, @RequestParam(value = "id") Long id){
         List<Role> roles = roleService.getAllRoles();
         model.addAttribute("allRoles", roles);
         model.addAttribute("user", userService.findById(id));
         return "updateUser";
     }
 
-    @PatchMapping("/admin/update")
-    public String updateUser(@ModelAttribute("user") @Valid User user, BindingResult bindingResult,
-                             Model model){
+    @PatchMapping("/admin")
+    public String updateUser(@ModelAttribute("user") @Valid User user, @RequestParam(value = "id", required = false) Long id,
+                             BindingResult bindingResult,
+                             Model model, Principal principal){
         userValidator.validate(user, bindingResult);
         if(bindingResult.hasErrors()){
             List<Role> roles = roleService.getAllRoles();
             model.addAttribute("allRoles", roles);
-            model.addAttribute("user", user);
+//            model.addAttribute("user", user);
+            model.addAttribute("authUser", userService.findByUsername(principal.getName()));
+            model.addAttribute("users", userService.listUsers());
+            model.addAttribute("activeTab", "usersTable");
+            model.addAttribute("user", userService.findById(id));
             return "updateUser";
         }
         userService.update(user);
         return "redirect:/users/admin";
     }
 
-    @DeleteMapping()
-    public String deleteUser(@ModelAttribute("user") User user){
-        userService.delete(user);
+    @DeleteMapping("/admin")
+    public String deleteUser(Model model, @RequestParam(value = "id", required = false) Long id){
+//        userService.delete(user);
+        model.addAttribute("user", userService.findById(id));
+        userService.deleteById(id);
         return "redirect:/users/admin";
     }
 
