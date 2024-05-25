@@ -47,15 +47,16 @@ public class UserServiceImp implements UserService{
 
 
     public User findById(Long id){
-        return usersRepository.findById(id).orElse(null);
+//        return usersRepository.findById(id).get();
+        return usersRepository.getById(id);
     }
 
 
-    @Transactional
-    @Override
-    public void delete(User user) {
-        usersRepository.delete(user);
-    }
+//    @Transactional
+//    @Override
+//    public void delete(User user) {
+//        usersRepository.delete(user);
+//    }
     @Transactional
     @Override
     public void deleteById(Long id) {

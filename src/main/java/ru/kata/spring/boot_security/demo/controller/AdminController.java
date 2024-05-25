@@ -1,7 +1,6 @@
 package ru.kata.spring.boot_security.demo.controller;
 
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,16 +33,8 @@ public class AdminController {
         this.userValidator = userValidator;
     }
 
-//    @GetMapping("/user")
-//    public String showUserInfo(Model model, Principal principal){
-//        User user = userService.findByUsername(principal.getName());
-//        model.addAttribute("user", user);
-//        return "user";
-//    }
-
     @GetMapping("/admin")
-    public String showAllUsers(Model model, Principal principal,
-                               @RequestParam(value = "id",required = false) Long id){
+    public String showAllUsers(Model model, Principal principal) {
         User authUser = userService.findByUsername(principal.getName());
         model.addAttribute("newUser", new User());
 //        supportingService.createModelForView(model, principal);
@@ -52,25 +43,51 @@ public class AdminController {
         model.addAttribute("allRoles", roleService.getAllRoles());
         model.addAttribute("activeTab", "usersTable");
         /*updateUser*/
-        model.addAttribute("user", userService.findById(id));
+//        model.addAttribute("user", userService.findById(id));
         return "adminPageTest";
     }
+
     @PostMapping("/admin")
     public String addUser(@ModelAttribute("newUser") @Valid User user, BindingResult bindingResult,
-                          Principal principal, Model model){
+                          Principal principal, Model model) {
         userValidator.validate(user, bindingResult);
 //        supportingService.createModelForView(model, principal);
         model.addAttribute("authUser", userService.findByUsername(principal.getName()));
         model.addAttribute("users", userService.listUsers());
         model.addAttribute("allRoles", roleService.getAllRoles());
         model.addAttribute("activeTab", "addUser");
-//        model.addAttribute("user", userService.findById(id)); /*updateUser*/
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return "adminPageTest"; // TODO!!!!!!!!!!!!!!!!!!
         }
         userService.add(user);
         return "redirect:/users/admin";
     }
+
+
+    @PatchMapping("/admin/edit")
+    public String updateUser(@ModelAttribute("userIter") @Valid User user,
+                             BindingResult bindingResult,
+                             Model model, Principal principal) {
+//        userValidator.validate(user, bindingResult);
+        model.addAttribute("allRoles", roleService.getAllRoles());
+        model.addAttribute("authUser", userService.findByUsername(principal.getName()));
+        model.addAttribute("users", userService.listUsers());
+        model.addAttribute("activeTab", "usersTable");
+//        model.addAttribute("newUser", new User());
+        if (bindingResult.hasErrors()) {
+            return "adminPageTest";
+        }
+        userService.update(user);
+        return "redirect:/users/admin";
+    }
+
+    @DeleteMapping("/admin")
+    public String deleteUser(Model model, @RequestParam("id") Long id) {
+        model.addAttribute("user", userService.findById(id));
+        userService.deleteById(id);
+        return "redirect:/users/admin";
+    }
+
 
 //    @GetMapping("/admin/new")
 //    public String showFormAddUser(Model model, Principal principal){
@@ -83,45 +100,13 @@ public class AdminController {
 //    }
 
 
-
-    @GetMapping("/admin/update")
-    public String updateUserForm(Model model, @RequestParam(value = "id") Long id){
-        List<Role> roles = roleService.getAllRoles();
-        model.addAttribute("allRoles", roles);
-        model.addAttribute("user", userService.findById(id));
-        return "updateUser";
-    }
-
-    @PatchMapping("/admin")
-    public String updateUser(@ModelAttribute("user") @Valid User user, @RequestParam(value = "id", required = false) Long id,
-                             BindingResult bindingResult,
-                             Model model, Principal principal){
-        userValidator.validate(user, bindingResult);
-        if(bindingResult.hasErrors()){
-            List<Role> roles = roleService.getAllRoles();
-            model.addAttribute("allRoles", roles);
-//            model.addAttribute("user", user);
-            model.addAttribute("authUser", userService.findByUsername(principal.getName()));
-            model.addAttribute("users", userService.listUsers());
-            model.addAttribute("activeTab", "usersTable");
-            model.addAttribute("user", userService.findById(id));
-            return "updateUser";
-        }
-        userService.update(user);
-        return "redirect:/users/admin";
-    }
-
-    @DeleteMapping("/admin")
-    public String deleteUser(Model model, @RequestParam(value = "id", required = false) Long id){
-//        userService.delete(user);
-        model.addAttribute("user", userService.findById(id));
-        userService.deleteById(id);
-        return "redirect:/users/admin";
-    }
-
-
-
-
+//    @GetMapping("/admin/update")
+//    public String updateUserForm(Model model, @RequestParam(value = "id") Long id){
+//        List<Role> roles = roleService.getAllRoles();
+//        model.addAttribute("allRoles", roles);
+//        model.addAttribute("user", userService.findById(id));
+//        return "updateUser";
+//    }
 
 
 }
