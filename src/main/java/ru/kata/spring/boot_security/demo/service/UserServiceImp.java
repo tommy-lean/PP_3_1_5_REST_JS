@@ -1,18 +1,19 @@
 package ru.kata.spring.boot_security.demo.service;
 
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.repositories.UsersRepository;
+import ru.kata.spring.boot_security.demo.util.NoSuchUserException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class UserServiceImp implements UserService{
+public class UserServiceImp implements UserService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -22,7 +23,7 @@ public class UserServiceImp implements UserService{
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User findByUsername(String username){
+    public User findByUsername(String username) {
         return usersRepository.findByUsername(username);
     }
 
@@ -40,17 +41,20 @@ public class UserServiceImp implements UserService{
     }
 
 
-    public User findById(Long id){
-        return usersRepository.getById(id);
+    public User findById(Long id) {
+        return usersRepository.findById(id)
+                .orElseThrow(() -> new NoSuchUserException(
+                        "There is no employee with ID = '" + id + "' in Database"
+                ));
     }
 
 
     @Transactional
     @Override
     public void deleteById(Long id) {
-        if (usersRepository.findById(id).isPresent()){
-            usersRepository.deleteById(id);
-        }
+        findById(id);
+        usersRepository.deleteById(id);
+
     }
 
     @Transactional

@@ -28,11 +28,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeRequests()
+//                .antMatchers("/**") // Разрешаем доступ ко всем URL-адресам
+//                .permitAll() // Разрешаем доступ без аутентификации
+//                .and()
+//                .csrf().disable();
         http
                 .authorizeRequests()
                 .antMatchers("/login", "/error").permitAll()
-                .antMatchers("/users/user").hasAnyRole("ADMIN", "USER")
-                .antMatchers("/users/admin/**").hasRole("ADMIN")
+                .antMatchers("/api/user").hasAnyRole("ADMIN", "USER")
+                .antMatchers("/api/users/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().successHandler(successUserHandler)
