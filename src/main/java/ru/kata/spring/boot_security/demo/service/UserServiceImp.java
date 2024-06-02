@@ -10,17 +10,19 @@ import ru.kata.spring.boot_security.demo.repositories.UsersRepository;
 import ru.kata.spring.boot_security.demo.util.NoSuchUserException;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImp implements UserService {
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
     @Autowired
-    public UserServiceImp(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImp(UsersRepository usersRepository, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     public User findByUsername(String username) {
@@ -36,6 +38,10 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void add(User user) {
+        user.setRoles(user.getRoles().stream()
+                .map(role -> roleService.getByName(role.getName()))
+                .collect(Collectors.toSet()));
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersRepository.save(user);
     }
@@ -60,6 +66,10 @@ public class UserServiceImp implements UserService {
     @Transactional
     @Override
     public void update(User user) {
+        user.setRoles(user.getRoles().stream()
+                .map(role -> roleService.getByName(role.getName()))
+                .collect(Collectors.toSet()));
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         usersRepository.save(user);
     }

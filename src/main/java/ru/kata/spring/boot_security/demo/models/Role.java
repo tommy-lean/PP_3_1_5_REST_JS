@@ -49,19 +49,20 @@ public class Role implements GrantedAuthority {
     public String getAuthority() {
         return getName();
     }
-// ROLE_
+
+
     @Override
     public String toString() {
-        return name.substring(5);
+        return "Role{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
     }
 
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
+        return Objects.hash(id, name);
     }
-
 
     @Override
     public boolean equals(Object o) {
