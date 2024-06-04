@@ -13,9 +13,6 @@ public interface UserService {
 
     void add(User user);
 
-//    void delete(User user);
-
-
     void deleteById(Long id);
 
     void update(User user);
@@ -23,7 +20,4 @@ public interface UserService {
     User findById(Long id);
 
     User findByUsername(String username);
-
-//    void createModelForView(Model model, Principal principal);
-
 }
